@@ -6,6 +6,8 @@ from matplotlib.patches import Circle
 import scipy
 from mpl_toolkits.mplot3d import Axes3D
 import time
+import socket
+
 
 '''
 code to get xy plane from 3d point cloud + image
@@ -14,6 +16,14 @@ inputs:
 	image: 			.jpg
 	
 '''
+
+# set up yolo socket
+TCP_PORT = 8080
+BUFFER_SIZE = 816
+MESSAGE = "Hello, World!"
+ 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((TCP_IP, TCP_PORT))
 
 #R = np.linalg.inv(R)
 #replace the name of this later
@@ -31,10 +41,26 @@ Z= df['Points_m_XYZ:2']
 distance = df['distance_m']
 
 # GET BOUNDING BOX DATA HERE: (hard coded for now)
-x1 = 50
-x2 = 500
-y1 = 100
-y2 = 300
+data = s.recv(BUFFER_SIZE)
+st = struct.Struct('=IQi200i')
+try:
+	packet = st.unpack(data)
+except:
+	continue
+print("Start")
+timestamp = packet[1]
+numObjects = packet[2]
+print('Timestamp: ', timestamp, 'NumObjects: ', numObjects)
+objects = []
+for i in range(numObjects):
+	index = 4*i
+	left = packet[index+3]
+	right = packet[index+4]
+	top = packet[index+5]
+	bottom = packet[index+6]
+	print(left, right, top, bottom)
+	objects.append([left,right,top,bottom])
+print("End")
 
 
 xr = 1.58
@@ -82,7 +108,7 @@ for i in range(size):
    circ = Circle((c2[0,i], c2[1,i]), .5, color='blue' )
    ax.add_patch(circ)
 
-# ???
+# get center of bounding box
 xcenter= (x1+x2)/2.0
 ycenter= (y1+y2)/2.0
 

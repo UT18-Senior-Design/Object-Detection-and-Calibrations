@@ -25,13 +25,14 @@ prev_time = datetime.now()
 while True:
     # get data from port
     data = soc.recv(1248)
-    print(len(data))
-
+    # print(len(data))
     # get all data except the last 2 bytes
     raw_data = data[:-2]
     count += 1
     if(count==90):
-        print(data_buff)
+        print((datetime.now()-prev_time).microseconds)
+        prev_time = datetime.now()
+
         #data_buff =  pd.DataFrame(columns=['x', 'y', 'z', 'distance'])
         data_buff = []
         #reset counter
