@@ -56,6 +56,7 @@ def get_pointcloud():
             '''
             azimuth = raw_data[2+offset] | (raw_data[3+offset] << 8)
             azimuth = azimuth / 100
+            alpha = azimuth * np.pi / 180.0
             # print(azimuth)
 
             for i in range(2):
@@ -65,10 +66,10 @@ def get_pointcloud():
                     reflectivity = data[6+j*3+offset]
 
                     # how to get alpha angle?
-                    azimuth2 = vertical_angle[j]
-                    x = distance*math.cos(azimuth2)*math.sin(azimuth)
-                    y = distance*math.cos(azimuth2)*math.cos(azimuth)
-                    z = distance*math.sin(azimuth2)
+                    omega = vertical_angle[j] * np.pi / 180.0
+                    x = distance*math.cos(omega)*math.sin(alpha)
+                    y = distance*math.cos(omega)*math.cos(alpha)
+                    z = distance*math.sin(omega)
 
                     # limit fov 
                     #if(45 <= azimuth <= 135):
