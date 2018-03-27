@@ -5,7 +5,7 @@ import socket
 import struct
 import binascii
 import array
-import cv2 
+#import cv2 
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 8080
@@ -15,7 +15,7 @@ def init_yolo_socket():
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((TCP_IP, TCP_PORT))
 
-def get_bounding_boxes():
+def get_bounding_boxes(s):
 	objects = []
 	while 1:
 		data = s.recv(BUFFER_SIZE)

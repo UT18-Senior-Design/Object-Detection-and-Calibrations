@@ -20,9 +20,9 @@ def init_velo_socket():
     soc.bind(('', PORT))
 
 #data_buff = pd.DataFrame(columns=['x', 'y', 'z', 'distance'])
-def get_pointcloud():
+def get_pointcloud(soc):
     data_buff = []
-
+    count = 0
     prev_time = datetime.now()
 
     while True:
@@ -76,8 +76,14 @@ def get_pointcloud():
                         # print('angle1: %f\tangle2: %f\t x: %f\ty: %f\tz: %f\tdistance: %f\t' % (azimuth, azimuth2, x, y, z, distance))
                    # data_buff.loc[count1] = [x, y, z, distance]
                     data_buff.append([x,y,z,distance])
-                    count1+=1
+                    
+
     return np.array(data_buff)
-                
+
+
+# print('point cloud test')              
+# soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# soc.bind(('', PORT))
+# np.savetxt('pcl.csv', get_pointcloud(), delimiter=',')
 
 

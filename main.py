@@ -20,19 +20,29 @@ inputs:
 '''
 
 # set up sockets
-init_yolo_socket()
-init_velo_socket()
+HOST = "192.168.1.201"
+PORT = 2368
+TCP_IP = '127.0.0.1'
+TCP_PORT = 8080
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((TCP_IP, TCP_PORT))
+soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+soc.bind(('', PORT))
 
 
 # get x, y, z, and distance data from dataframe 
-pcl = get_pointcloud()
+pcl = get_pointcloud(soc)
 X= pcl[:,0]
 Y= pcl[:,1]
 Z= pcl[:,2]
 distance = pcl[:,3]
 
 # GET BOUNDING BOX DATA HERE: (hard coded for now)
-timestamp, numObjects, objects = get_bounding_boxes()
+numObjects = 0
+objects = []
+timestamp = 0
+while numObjects < 1:
+	timestamp, numObjects, objects = get_bounding_boxes(s)
 
 
 xr = 1.58
@@ -49,13 +59,6 @@ R = np.matmul(Zr,Yr,Xr)
 
 # transpose matrix?
 T = np.matrix([[-1],[3],[.7]])
-# get image
-img = plt.imread('single_truck.jpg')
-# plot image
-fig,ax = plt.subplots(1)
-plt.xlim(0, 720)
-plt.ylim(450,0)
-ax.imshow(np.fliplr(img))
 
 # make A matrix (x y z)
 size= len(X)
@@ -71,30 +74,13 @@ T2= np.matrix.transpose(T2)
 now= time.time()
 c2 = 100*np.matmul((R),(A-T2))
 
-# plot points?
-for i in range(size):    
-   circ = Circle((c2[0,i], c2[1,i]), .5, color='blue' )
-   ax.add_patch(circ)
-
 # get center of bounding box
-xcenter= (x1+x2)/2.0
-ycenter= (y1+y2)/2.0
+xcenter= (objects[0][0]+objects[0][1])/2.0
+ycenter= (objects[0][2]+objects[0][3])/2.0
 
 
 c3= c2
 B= np.square((c3[0,:]-xcenter))+ np.square((c3[1,:]-ycenter))
 
 index0= np.argmin(B, axis=1)
-print(index0)
-
-# check time elapsed
-runtime= time.time()- now
-print("Matrix calculation runtime:" ,runtime)
-
-circ = Circle((c2[0,index0], c2[1,index0]), 25, color='red' )
-ax.add_patch(circ)
-plt.plot([x1,x1],[y1,y2],color ='black')
-plt.plot([x2,x2],[y1,y2], color ='black')
-plt.plot([x1,x2],[y1,y1], color ='black')
-plt.plot([x1,x2],[y2,y2],color ='black')
-plt.show()
+print(distance[index0])
