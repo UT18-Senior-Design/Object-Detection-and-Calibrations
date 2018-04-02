@@ -92,6 +92,25 @@ while 1:
 		#print('y', Y[index0])
 		#print("Index of center point is:", index0)
 		print('x:{:.2f} y:{:.2f} distance: {:.2f}'.format(X[index0], Y[index0], distance[index0]));
+		# x_in = X[index0]
+		# y_in = Y[index0]
+		# t_in = datetime.datetime.now().microseconds*1000
+		# dt = t_in - prev_t
+		# vx_in = (x_in - prev_x)/(t_in - prev_t)
+		# vy_in = (y_in - prev_x)/(t)
+		# prev_x 
+		# prev_y
+		# prev_t
 		#make sure we uncomment out the previous line with distance
 	    #print(distance[int(index0)]) since the index is not just an int?
 	print(' ')
+
+
+	# For one object only (no loop)
+	# For detection: 
+	#	output: x,y, v_x, v_y (of detected object)
+	# 	need previous x (m), y(m), and t (seconds) to calculate v's
+	# 
+	# For prediction: (collisionNew.py code)
+	# 	input: x,y, v_x, v_y
+	#	
