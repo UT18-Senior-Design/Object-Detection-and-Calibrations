@@ -17,18 +17,10 @@ inputs:
 	
 '''
 
-# set up yolo socket
-TCP_PORT = 8080
-BUFFER_SIZE = 816
-MESSAGE = "Hello, World!"
- 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
-
 #R = np.linalg.inv(R)
 #replace the name of this later
 # GET LIDAR DATA HERE:
-df = pd.read_csv("truck.csv")
+df = pd.read_csv("evan1.csv")
 print(df.shape)
 
 df = df[df['Points_m_XYZ:0']>=0]
@@ -40,28 +32,10 @@ Y= df['Points_m_XYZ:1']
 Z= df['Points_m_XYZ:2']
 distance = df['distance_m']
 
-# GET BOUNDING BOX DATA HERE: (hard coded for now)
-data = s.recv(BUFFER_SIZE)
-st = struct.Struct('=IQi200i')
-try:
-	packet = st.unpack(data)
-except:
-	continue
-print("Start")
-timestamp = packet[1]
-numObjects = packet[2]
-print('Timestamp: ', timestamp, 'NumObjects: ', numObjects)
-objects = []
-for i in range(numObjects):
-	index = 4*i
-	left = packet[index+3]
-	right = packet[index+4]
-	top = packet[index+5]
-	bottom = packet[index+6]
-	print(left, right, top, bottom)
-	objects.append([left,right,top,bottom])
-print("End")
-
+x1 = 213
+x2 = 327
+y1 = 109
+y2 = 277
 
 xr = 1.58
 yr = -1.42 #-1*math.pi/2.0    
@@ -78,12 +52,12 @@ R = np.matmul(Zr,Yr,Xr)
 # transpose matrix?
 T = np.matrix([[-1],[3],[.7]])
 # get image
-img = plt.imread('single_truck.jpg')
+img = plt.imread('evan1.jpg')
 # plot image
 fig,ax = plt.subplots(1)
 plt.xlim(0, 720)
 plt.ylim(450,0)
-ax.imshow(np.fliplr(img))
+ax.imshow((img))
 
 # make A matrix (x y z)
 X1= X.values
@@ -117,13 +91,13 @@ c3= c2
 B= np.square((c3[0,:]-xcenter))+ np.square((c3[1,:]-ycenter))
 
 index0= np.argmin(B, axis=1)
-print(index0)
+print(distance.iloc[int(index0)])
 
 # check time elapsed
 runtime= time.time()- now
 print("Matrix calculation runtime:" ,runtime)
 
-circ = Circle((c2[0,index0], c2[1,index0]), 25, color='red' )
+circ = Circle((c2[0,index0], c2[1,index0]), 5, color='red' )
 ax.add_patch(circ)
 plt.plot([x1,x1],[y1,y2],color ='black')
 plt.plot([x2,x2],[y1,y2], color ='black')

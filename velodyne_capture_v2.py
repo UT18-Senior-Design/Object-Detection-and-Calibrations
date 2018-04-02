@@ -21,19 +21,20 @@ def init_velo_socket():
 
 #data_buff = pd.DataFrame(columns=['x', 'y', 'z', 'distance'])
 def get_pointcloud(soc):
+    prev_time = datetime.now()
     data_buff = []
     count = 0
-    prev_time = datetime.now()
 
     while True:
         # get data from port
         data = soc.recv(1248)
-        # print(len(data))
+        #print('pcl size: ', len(data))
         # get all data except the last 2 bytes
         raw_data = data[:-2]
         count += 1
+        #print('Avg for one packet in microseconds: ', (datetime.now()-prev_time).microseconds/count)
         if(count==90):
-            print((datetime.now()-prev_time).microseconds)
+            #print('Time for one pcl in microseconds: ', (datetime.now()-prev_time).microseconds)
             prev_time = datetime.now()
 
             #data_buff =  pd.DataFrame(columns=['x', 'y', 'z', 'distance'])
@@ -81,9 +82,11 @@ def get_pointcloud(soc):
     return np.array(data_buff)
 
 
-# print('point cloud test')              
-# soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# soc.bind(('', PORT))
-# np.savetxt('pcl.csv', get_pointcloud(), delimiter=',')
+# Code to test point clouds: 
+print('point cloud test')              
+soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+soc.bind(('', PORT))
+np.savetxt('pcl.csv', get_pointcloud(soc), delimiter=',')
+soc.close()
 
 
