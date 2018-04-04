@@ -6,22 +6,18 @@ Created on Mon Feb 19 12:07:05 2018
 @author:
 """
 
-import shapely
 import shapely.geometry
 import shapely.affinity
 import matplotlib.pyplot as plt
-import descartes
 from descartes import PolygonPatch
 import math, random
 # import winsound
 import numpy as np
-
-
-
-
-#from Kalman.py import Kalman
+import os
 
 delta_t = 3.0
+
+
 
 #initialize GPS capture
 """
@@ -36,16 +32,13 @@ data_string = data[206:270].decode('utf-8')
 data_list = data_string.split(",")
 """
 
+
 #Initialize Kalman stuff
 delta_t = 1
-# Formation matrix
 F_ = np.array([[1, 0, delta_t, 0],[0, 1, 0, delta_t],[0, 0, 1, 0], [0, 0, 0, 1]])
-# Laser error/uncertainty
 R_laser = np.eye(4)*0.0225
-# Shaping matrix (may not be used)
 H_laser = np.array([[1,0,0,0],[0,1,0,0]])
 #P_ = np.array([[1,0,0,0],[0,1,0,0],[0,0,1000,0],[0,0,0,1000]])
-# Predicted uncertainty 
 Q_ = np.array([[0.25*R_laser[0,0]*delta_t**4, 0, 0.5*R_laser[0,0]*delta_t**3,0],
                [0,0.25*R_laser[1,1]*delta_t**4 ,0,0.5*R_laser[0,0]*delta_t**3],
                [0.5*R_laser[0,0]*delta_t**3,0,R_laser[0,0]*delta_t**2,0],
@@ -56,13 +49,15 @@ Q_ = np.array([[0.25*R_laser[0,0]*delta_t**4, 0, 0.5*R_laser[0,0]*delta_t**3,0],
 def kn_to_ms(kn):
     return kn*0.514444
   
-# Gets data from object tracking module (evan's thing)
-#   obj: object to update
-#   n: ?  
-def object_tracking(obj, n):
-    obj.calc(n)
+#gets data from object tracking module (evan's thing)  
+def object_tracking(obj):
+    obj.calc()
     return obj.x_
-    
+
+def update_F_and_Q(delta_t):
+    F_[0,2] = delta_t
+    Q_[1,3] = delta_t
+
 #represents a 2D rotated rectangle, angle is from 0 to 360
 class Rectangle:
     def __init__(self, center_x, center_y, width, length, angle):
@@ -104,25 +99,21 @@ class Car(Rectangle):
         self.x_ = np.array([0, 0, 1, 1])
         self.P_ = np.array([[1,0,0,0],[0,1,0,0],[0,0,1000,0],[0,0,0,1000]])
         self.results = np.empty([1,2])
+        self.locarray = np.empty([1,2])
     def update_locarray(self, locarray):
         self.locarray = locarray
-    # Kalman predictions?
-    def calc(self, n):  
-        #Predict (update matrices)
+    def calc(self):  
+        #Predict 
         self.x_ = F_.dot(self.x_)
         self.P_ = F_.dot(self.P_).dot(F_.T) + Q_
-        # Kalman Update (update more matricses?)
-        # locarray: x, y, time
-        # n: row in locarray? 
-        # CHANGE THIS: 
-        self.z = np.array([self.locarray[n,0],self.locarray[n,1], self.locarray[n,0]-self.locarray[n-1,0], self.locarray[n,1]-self.locarray[n-1,1]])
+        # Kalman Update
+        self.z = np.array([self.locarray[0],self.locarray[1], self.locarray[2], self.locarray[3]])
         self.y = self.z-self.x_
         self.S = self.P_ + R_laser
         self.K = self.P_.dot(np.linalg.inv(self.S))
         self.x_ = self.x_ + self.K.dot(self.y)
         self.P_ = (np.eye(len(self.P_))-self.K).dot(self.P_)
         self.results = np.append(self.results, [self.x_[0:2]], axis = 0)    
-
     #adjusts cx_future and cy_future as where the center of car will be after delta_t time
     def update_speed(self):
         #data = soc.recv(554)
@@ -131,7 +122,8 @@ class Car(Rectangle):
         #df = pd.DataFrame(data_list)
         #self.speed = kn_to_ms(float(df.iloc[7][0]))
         
-        self.speed = float(random.randint(1,15))
+        #self.speed = float(random.randint(1,15))
+        self.speed = 0
         
         #self.speed = math.sqrt((self.x_[2]*self.x_[2])+(self.x_[3]*self.x_[3]))
     def update_for_box(self):
@@ -171,8 +163,8 @@ class Car(Rectangle):
             return True
         else:
             return False
-    def update_object(self, n):
-        array = object_tracking(self, n)
+    def update_object(self):
+        array = object_tracking(self)
         self.cx = array[0]
         self.cy = array[1]
         vx = array[2]
@@ -222,109 +214,66 @@ fake_obj = {
         }
 
 
-
 #returns true if car and obj intersect
 def collision_detection(car, obj):
     return car.collision_future(obj)
 
+def alert_linx():
+    duration = 1  # second
+    freq = 440  # Hz
+    os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
 
 def alert():
     print ("***CRASH DETECTED***")
+    alert_linux()
     frequency = 600 # Set Frequency To 2500 Hertz
     duration = 750  # Set Duration To 1000 ms == 1 second
     # winsound.Beep(frequency, duration)
     # winsound.Beep(frequency, duration)
 
-
-
-
-
-
-############## the "MAIN" ####################
+############## the "MAIN"####################
     
 
 """GET LOCARRAY INPUT"""
-locarray1 = np.empty([1,3])
-
-# Get input: object position stream?
-with open("obj_pose-laser-radar-synthetic-ukf-input1.txt","r") as f:
-    for line in f:
-        location = line.lower()
-        location = location.replace("\n","")
-        location = location.split("\t")
-        for n in range(len(location)):
-           location[n] = float(location[n])
-        locarray1 = np.append(locarray1, [location], axis = 0)
-plt.plot(locarray1[1:,0],locarray1[1:,1])
-plt.title("Input")
-plt.show()
-
-# Car location and dimensions (CHANGE)
-my_car = Car(0,0,car_dim["width"],car_dim["length"],0)
-#my_car.update_locarray(locarray1)
-#other_car = Car(fake_obj["x"],fake_obj["y"],fake_obj["width"],fake_obj["length"],fake_obj["angle"])
-
-# Detected object (CHANGE)
-other_car = Car(0,0,fake_obj["width"],fake_obj["length"],0)
-# update location array?
-other_car.update_locarray(locarray1)
-
-# Plotting 
-fig = plt.figure(1, figsize=(15, 8))
-ax = fig.add_subplot(121)
-ax.set_xlim(-40, 40)
-ax.set_ylim(-40, 40)  
+# locarray1 = np.empty([1,3])
+# with open("obj_pose-laser-radar-synthetic-ukf-input1.txt","r") as f:
+#     for line in f:
+#         location = line.lower()
+#         location = location.replace("\n","")
+#         location = location.split("\t")
+#         for n in range(len(location)):
+#            location[n] = float(location[n])
+#         locarray1 = np.append(locarray1, [location], axis = 0)
+# plt.plot(locarray1[1:,0],locarray1[1:,1])
+# plt.title("Input")
+# plt.show()
 
 
-my_car.update_speed()
-other_car.update_object(1)
-
-ax.add_patch(PolygonPatch(my_car.get_contour(), fc='#990000', alpha=1))
-ax.add_patch(PolygonPatch(my_car.get_path(), fc='#990000', alpha=.5))
-ax.add_patch(PolygonPatch(other_car.get_contour(), fc='#000099', alpha=1))
-ax.add_patch(PolygonPatch(other_car.get_path(), fc='#000099', alpha=.5))
-#ax.add_patch(PolygonPatch(my_car.intersection_future(obj), fc='#009900', alpha=1))
+# my_car = Car(0,0,car_dim["width"],car_dim["length"],0)
+# other_car = Car(0,0,fake_obj["width"],fake_obj["length"],0)
+# other_car.update_locarray(locarray)
 
 
-if(collision_detection(my_car,other_car)):
-    print('alert')
-    # alert()
+# fig = plt.figure(1, figsize=(15, 8))
+# ax = fig.add_subplot(121)
+# ax.set_xlim(-40, 40)
+# ax.set_ylim(-40, 40)  
 
-  
+
+# my_car.update_speed()
+# other_car.update_object()
+
+# ax.add_patch(PolygonPatch(my_car.get_contour(), fc='#990000', alpha=1))
+# ax.add_patch(PolygonPatch(my_car.get_path(), fc='#990000', alpha=.5))
+# ax.add_patch(PolygonPatch(other_car.get_contour(), fc='#000099', alpha=1))
+# ax.add_patch(PolygonPatch(other_car.get_path(), fc='#000099', alpha=.5))
+
+
+# if(collision_detection(my_car,other_car)):
+#     alert()
 
                                      
-plt.show()
-
-
-
-for i in range(2,70,1):
-    fig = plt.figure(1, figsize=(15, 8))
-    ax = fig.add_subplot(121)
-    ax.set_xlim(-40, 40)
-    ax.set_ylim(-40, 40)  
-
-    my_car.update_speed()
-    other_car.update_object(i)
-    
-    print(other_car.x_)
-
-    ax.add_patch(PolygonPatch(my_car.get_contour(), fc='#990000', alpha=1))
-    ax.add_patch(PolygonPatch(my_car.get_path(), fc='#990000', alpha=.5))
-    ax.add_patch(PolygonPatch(other_car.get_contour(), fc='#000099', alpha=1))
-    ax.add_patch(PolygonPatch(other_car.get_path(), fc='#000099', alpha=.5))
-     #ax.add_patch(PolygonPatch(my_car.intersection_future(obj), fc='#009900', alpha=1))
-
-    if(collision_detection(my_car,other_car)):
-        print ("***CRASH DETECTED***")
-        frequency = 600 # Set Frequency To 2500 Hertz
-        duration = 750  # Set Duration To 1000 ms == 1 second
-        # winsound.Beep(frequency, duration)
-        # winsound.Beep(frequency, duration)
-    else:
-        print ("")
-
-                                     
-    plt.show()
+# plt.show()
 
 
 

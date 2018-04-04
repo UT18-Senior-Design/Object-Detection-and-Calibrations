@@ -11,7 +11,7 @@ import time
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 8080
-BUFFER_SIZE = 816
+BUFFER_SIZE = 1024
 
 def init_yolo_socket():
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,23 +22,24 @@ def get_bounding_boxes(s):
 	while 1:
 		data = s.recv(BUFFER_SIZE)
 		#print('yolo size: ', len(data))
-		st = struct.Struct('=IQi200i')
+		st = struct.Struct('=IIQi250i')
 		try:
 			packet = st.unpack(data)
 		except:
 			continue
 		#print("Start")
 		#print('received packet #', packet[0])
-		timestamp = packet[1]
-		numObjects = packet[2]
+		timestamp = packet[2]
+		numObjects = packet[3]
 		#print('Timestamp: ', timestamp, 'NumObjects: ', numObjects)
 		for i in range(numObjects):
-			index = 4*i
-			left = packet[index+3]
-			right = packet[index+4]
-			top = packet[index+5]
-			bottom = packet[index+6]
-			objects.append([left,right,top,bottom])
+			index = 5*i
+			left = packet[index+4]
+			right = packet[index+5]
+			top = packet[index+6]
+			bottom = packet[index+7]
+			object_type = packet[index+8]
+			objects.append([left,right,top,bottom,object_type])
 			#print(left, right, top, bottom)
 		#print("End")
 		break
