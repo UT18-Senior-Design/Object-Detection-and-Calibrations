@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import os
+import struct
 
 HOST = "192.168.1.201"
 PORT = 2368

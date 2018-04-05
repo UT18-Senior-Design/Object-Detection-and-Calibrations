@@ -98,22 +98,47 @@ while 1:
 	T2= np.repeat(T1,size,axis=0)
 	T2= np.matrix.transpose(T2)
 
-	# Multiply matrices
+	# Multiply matrices (lidar points in pixel coordinates)
 	c2 = 100*np.matmul((R),(A-T2))
+	c2_T = np.matrix.transpose(c2)
+	#np.column_stack([c2_T, X, Y, distance])
+
+
 
 	#print("matrix calculations: ", (datetime.datetime.now()-start).microseconds)
 	#print('objects', numObjects)
 	#print(datetime.datetime.now())
 
 	for i in range(numObjects):
+		left = objects[i][0]
+		right =  objects[i][1]
+		top = objects[i][2]
+		bottom =  objects[i][3]
+
 		# Center of box
-		xcenter = (objects[i][0]+objects[i][1])/2.0
-		ycenter = (objects[i][2]+objects[i][3])/2.0
-		c3 = c2
+		xcenter = (left+right)/2.0
+		ycenter = (top+bottom)/2.0
+
+		# c3 = c2
 		# Bounding box
-		B = np.square((c3[0,:]-xcenter))+ np.square((c3[1,:]-ycenter))
+		start = datetime.datetime.now()
+
+		#B = np.square((c2[0,:]-xcenter))+ np.square((c2[1,:]-ycenter))
+
+		# Get lidar points in bounding box
+		#points = []
+
+		points = [[X[i], Y[i], distance[i]] for i in range(c2_T.shape[0]) if (c2_T[i,0] > left and c2_T[i,0] < right and c2_T[i,1] > top and c2_T[i,1] < bottom)]
+		# for i in range(c2_T.shape[0]):
+		# 	if c2_T[i,0] > left and c2_T[i,0] < right and c2_T[i,1] > top and c2_T[i,1] < bottom:
+		# 		points.append([X[i], Y[i], distance[i]])
+		elapsed = (datetime.datetime.now() - start).microseconds
+		print(elapsed/1000)
+		print(len(points)) 
+
 		# Get index of lidar point for detected object
 		index0 = int(np.argmin(B, axis=1))
+		
 
 		#print('y', Y[index0])
 		#print("Index of center point is:", index0)
