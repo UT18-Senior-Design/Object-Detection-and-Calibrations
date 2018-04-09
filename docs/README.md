@@ -54,6 +54,8 @@ Here is the block diagram of the system:
 
   ## Object Prediction
 
+  We used Kalman filtering to predict the trajectory of detected objects.
+
 
   # Testing and Results 
 
