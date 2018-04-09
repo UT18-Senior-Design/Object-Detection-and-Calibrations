@@ -47,17 +47,21 @@ soc.bind(('', PORT))
 
 # For matrix values
 xr = 95 * math.pi/180
-yr = 0 * math.pi/180  
+yr = 10 * math.pi/180  
 zr = 0 * math.pi/180
 
 # Get R matrix
 Xr = np.matrix([[1,0,0],[0,math.cos(xr),-1*math.sin(xr)],[0,math.sin(xr),math.cos(xr)]])
 Yr = np.matrix([[math.cos(yr),0,math.sin(yr)],[0,1,0],[-1*math.sin(yr),0,math.cos(yr)]])
 Zr = np.matrix([[math.cos(zr),-1*math.sin(zr),0],[math.sin(zr),math.cos(zr),0],[0,0,1]])
-R = np.matmul(Zr,Yr,Xr)
+
+F = np.matrix([[935,0,0],[0,935,0],[225,375,1]])
+
+R = np.matmul(Zr,Yr)
+R= np.matmul(R,Xr)
 
 # Transpose matrix?
-T = np.matrix([[-2.1],[0],[1.4]])
+T = np.matrix([[0.9],[0],[-1.32]])
 T1=np.matrix.transpose(T)
 
 # Initialize previous x,y,t
@@ -95,13 +99,13 @@ while 1:
 	Y1= np.matrix.transpose(Y)
 	Z1= np.matrix.transpose(Z)
 	A= np.matrix([X1, Y1 ,Z1])
+	print(A.shape)
 	T2= np.repeat(T1,size,axis=0)
 	T2= np.matrix.transpose(T2)
 
 	# Multiply matrices (lidar points in pixel coordinates)
-	c2 = 500*np.matmul((R),(A-T2))
-	c2_T = np.matrix.transpose(c2)
-	#np.column_stack([c2_T, X, Y, distance])
+	c2 = np.matmul((F), (R))
+	c2 = .25*np.matmul((c2),(A+T2))
 
 
 

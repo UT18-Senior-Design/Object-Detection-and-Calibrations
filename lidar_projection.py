@@ -37,10 +37,16 @@ cap = cv2.VideoCapture(0)
 # plt.ion()
 # plt.show()
 
+if not cap.isOpened():
+	raise IOError("cannot open webcam")
+
 while 1:
 	#pcl = get_pointcloud(soc)
 	flag, frame = cap.read()
 	cv2.imshow('frame', frame)	
+	c = cv2.waitKey(1)
+	if c == 27:
+		break
 	# X= pcl[:,0]
 	# Y= pcl[:,1]
 	# Z= pcl[:,2]
@@ -57,3 +63,5 @@ while 1:
 	# # Multiply matrices (lidar points in pixel coordinates)
 	# c2 = 500*np.matmul((R),(A-T2))
 	# plt.scatter(np.asarray(c2[0,:]), np.asarray(c2[1,:]), s=0.5, c='red')
+cap.release()
+cap.destroyAllWindows()
