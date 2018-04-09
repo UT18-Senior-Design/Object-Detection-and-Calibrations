@@ -46,9 +46,9 @@ soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 soc.bind(('', PORT))
 
 # For matrix values
-xr = 1.58
-yr = -1.42 #-1*math.pi/2.0    
-zr = 1.58
+xr = 95 * math.pi/180
+yr = 0 * math.pi/180  
+zr = 0 * math.pi/180
 
 # Get R matrix
 Xr = np.matrix([[1,0,0],[0,math.cos(xr),-1*math.sin(xr)],[0,math.sin(xr),math.cos(xr)]])
@@ -57,7 +57,7 @@ Zr = np.matrix([[math.cos(zr),-1*math.sin(zr),0],[math.sin(zr),math.cos(zr),0],[
 R = np.matmul(Zr,Yr,Xr)
 
 # Transpose matrix?
-T = np.matrix([[-1],[3],[.7]])
+T = np.matrix([[-2.1],[0],[1.4]])
 T1=np.matrix.transpose(T)
 
 # Initialize previous x,y,t
@@ -99,7 +99,7 @@ while 1:
 	T2= np.matrix.transpose(T2)
 
 	# Multiply matrices (lidar points in pixel coordinates)
-	c2 = 100*np.matmul((R),(A-T2))
+	c2 = 500*np.matmul((R),(A-T2))
 	c2_T = np.matrix.transpose(c2)
 	#np.column_stack([c2_T, X, Y, distance])
 
@@ -123,18 +123,18 @@ while 1:
 		# Bounding box
 		start = datetime.datetime.now()
 
-		#B = np.square((c2[0,:]-xcenter))+ np.square((c2[1,:]-ycenter))
+		B = np.square((c2[0,:]-xcenter))+ np.square((c2[1,:]-ycenter))
 
 		# Get lidar points in bounding box
 		#points = []
 
-		points = [[X[i], Y[i], distance[i]] for i in range(c2_T.shape[0]) if (c2_T[i,0] > left and c2_T[i,0] < right and c2_T[i,1] > top and c2_T[i,1] < bottom)]
+		#points = [[X[i], Y[i], distance[i]] for i in range(c2_T.shape[0]) if (c2_T[i,0] > left and c2_T[i,0] < right and c2_T[i,1] > top and c2_T[i,1] < bottom)]
 		# for i in range(c2_T.shape[0]):
 		# 	if c2_T[i,0] > left and c2_T[i,0] < right and c2_T[i,1] > top and c2_T[i,1] < bottom:
 		# 		points.append([X[i], Y[i], distance[i]])
-		elapsed = (datetime.datetime.now() - start).microseconds
-		print(elapsed/1000)
-		print(len(points)) 
+		# elapsed = (datetime.datetime.now() - start).microseconds
+		# print(elapsed/1000)
+		# print(len(points)) 
 
 		# Get index of lidar point for detected object
 		index0 = int(np.argmin(B, axis=1))
@@ -144,7 +144,7 @@ while 1:
 		#print("Index of center point is:", index0)
 
 		# printing x,y, and distance for detected objects
-		# print('x:{:.2f} y:{:.2f} distance: {:.2f}'.format(X[index0], Y[index0], distance[index0]));
+		print('x:{:.2f} y:{:.2f} distance: {:.2f}'.format(X[index0], Y[index0], distance[index0]));
 
 		# Get inputs ready for prediction: [x,y,vx,vy,dt]
 		x = X[index0]
@@ -167,7 +167,7 @@ while 1:
 
 		# Code from collisionNew.py:
 		other_car.update_locarray([x, y, vx, vy, dt])
-		print('distance: {:.2f}'.format(distance[index0]))  
+		#print('distance: {:.2f}'.format(distance[index0]))  
 
 		my_car.update_speed()
 		other_car.update_object()

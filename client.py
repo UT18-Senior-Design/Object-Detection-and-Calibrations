@@ -54,11 +54,11 @@ if __name__ == "__main__":
 	s.connect((TCP_IP, TCP_PORT))
 	timestamps = []
 	while 1:
-		time.sleep(0.1)
 		timestamp, numObjects, objects = get_bounding_boxes(s)
-		#timestamps.append(timestamp)
-	# diff = []
-	# for i in range(len(timestamps)-1):
-	# 	time_diff = timestamps[i+1] - timestamps[i]
-	# 	print(time_diff)
-	# 	diff.append(time_diff)
+		for i in range(numObjects):
+			left = objects[i][0]
+			right =  objects[i][1]
+			top = objects[i][2]
+			bottom =  objects[i][3]
+			print((left+right/2.0), (top+bottom)/2.0)
+		print('\n')

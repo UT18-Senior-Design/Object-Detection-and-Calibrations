@@ -6,101 +6,66 @@ from matplotlib.patches import Circle
 import scipy
 from mpl_toolkits.mplot3d import Axes3D
 import time
+from camera_capture import get_image
+from velodyne_capture_v3 import init_velo_socket, get_pointcloud
 import socket
 
 
-'''
-code to get xy plane from 3d point cloud + image
-inputs: 
-	point cloud: 	csv/data data frame
-	image: 			.jpg
-	
-'''
+PORT = 2368
+soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+soc.bind(('', PORT))
 
+pcl = get_pointcloud(soc)
+X= pcl[:,0]
+Y= pcl[:,1]
+Z= pcl[:,2]
+distance = pcl[:,3]
+# from resizeimage import resizeimage
 #R = np.linalg.inv(R)
 #replace the name of this later
-# GET LIDAR DATA HERE:
-df = pd.read_csv("evan1.csv")
-print(df.shape)
 
-df = df[df['Points_m_XYZ:0']>=0]
-df = df[df['distance_m']<=30]
 
-# get x, y, z, and distance data from dataframe 
-X= df['Points_m_XYZ:0']
-Y= df['Points_m_XYZ:1']
-Z= df['Points_m_XYZ:2']
-distance = df['distance_m']
 
-x1 = 213
-x2 = 327
-y1 = 109
-y2 = 277
+# For matrix values
+xr = 95 * math.pi/180
+yr = 0 * math.pi/180  
+zr = 0 * math.pi/180
 
-xr = 1.58
-yr = -1.42 #-1*math.pi/2.0    
-zr = 1.58
 
 # start z by 90 y by -90
 
-# Get R matrix
 Xr = np.matrix([[1,0,0],[0,math.cos(xr),-1*math.sin(xr)],[0,math.sin(xr),math.cos(xr)]])
 Yr = np.matrix([[math.cos(yr),0,math.sin(yr)],[0,1,0],[-1*math.sin(yr),0,math.cos(yr)]])
 Zr = np.matrix([[math.cos(zr),-1*math.sin(zr),0],[math.sin(zr),math.cos(zr),0],[0,0,1]])
-R = np.matmul(Zr,Yr,Xr)
+R = np.matmul(Zr,Yr)
+R= np.matmul(R,Xr)
 
-# transpose matrix?
-T = np.matrix([[-1],[3],[.7]])
-# get image
-img = plt.imread('evan1.jpg')
-# plot image
+T = np.matrix([[-2.1],[0],[1.4]])
+img = get_image()
+#img= resizeimage.resize_height(img,450, validate=True)
 fig,ax = plt.subplots(1)
 plt.xlim(0, 720)
 plt.ylim(450,0)
-ax.imshow((img))
+ax.imshow(img)
 
-# make A matrix (x y z)
-X1= X.values
-size= len(X1)
-X1= np.matrix.transpose(X1)
-Y1= Y.values
-Y1= np.matrix.transpose(Y1)
-Z1= Z.values
-Z1= np.matrix.transpose(Z1)
+now = time.time()
+
+size= len(X)
+X1= np.matrix.transpose(X)
+Y1= np.matrix.transpose(Y)
+Z1= np.matrix.transpose(Z)
 A=[X1,Y1,Z1]
 A= np.matrix([X1,Y1 ,Z1])
 
-# multiply matrices
 T1=np.matrix.transpose(T)
 T2= np.repeat(T1,size,axis=0)
+
 T2= np.matrix.transpose(T2)
-now= time.time()
-c2 = 100*np.matmul((R),(A-T2))
-
-# plot points?
-for i in range(size):    
-   circ = Circle((c2[0,i], c2[1,i]), .5, color='blue' )
-   ax.add_patch(circ)
-
-# get center of bounding box
-xcenter= (x1+x2)/2.0
-ycenter= (y1+y2)/2.0
 
 
-c3= c2
-B= np.square((c3[0,:]-xcenter))+ np.square((c3[1,:]-ycenter))
+c2 = 160*np.matmul((R),(A-T2))
 
-index0= np.argmin(B, axis=1)
-print(distance.iloc[int(index0)])
+plt.scatter(np.asarray(c2[0,:]), np.asarray(c2[1,:]), s=0.5, c='red')
 
-# check time elapsed
-runtime= time.time()- now
-print("Matrix calculation runtime:" ,runtime)
 
-circ = Circle((c2[0,index0], c2[1,index0]), 5, color='red' )
-ax.add_patch(circ)
-plt.plot([x1,x1],[y1,y2],color ='black')
-plt.plot([x2,x2],[y1,y2], color ='black')
-plt.plot([x1,x2],[y1,y1], color ='black')
-plt.plot([x1,x2],[y2,y2],color ='black')
 plt.show()

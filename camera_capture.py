@@ -12,9 +12,11 @@ camera = cv2.VideoCapture(camera_port)
  
 # Captures a single image from the camera and returns it in PIL format
 def get_image():
- # read is the easiest way to get a full image out of a VideoCapture object.
- retval, im = camera.read()
- return im
+	# read is the easiest way to get a full image out of a VideoCapture object.
+	camera = cv2.VideoCapture(camera_port)
+	retval, im = camera.read()
+	del(camera)
+	return im
  
 # Ramp the camera - these frames will be discarded and are only used to allow v4l2
 # to adjust light levels, if necessary
