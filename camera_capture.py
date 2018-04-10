@@ -1,7 +1,7 @@
 import cv2
  
 # Camera 0 is the integrated web cam on my netbook
-camera_port = 0
+camera_port = 1
  
 #Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 30

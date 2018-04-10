@@ -67,7 +67,9 @@ def get_pointcloud(soc):
                 for i in xrange(NUM_LASERS):
                     #time_offset = (55.296 * seq_index + 2.304 * i) / 1000000.0
                     if arr[i * 2] != 0:
-                        data_buff.append(calc(arr[i * 2], azimuth, i, timestamp + time_offset))
+                        x, y, z, dist = calc(arr[i * 2], azimuth, i, timestamp + time_offset)
+                        if y > 0:
+                            data_buff.append([x, y, z, dist])
                     
 
     return np.array(data_buff)
