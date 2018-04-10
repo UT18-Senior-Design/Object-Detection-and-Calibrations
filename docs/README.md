@@ -4,7 +4,7 @@
 
 EE 464H/R Senior Design, Spring 2018 - Team 11
 
-Team Members: Aditya Kharosekar, Chang Park, Evan Reid, Roberto Rioja, Steven Han, Trevor Eggenberger, and [Vivian Tan](vivianistan.github.io)
+Team Members: Aditya Kharosekar, Chang Park, Evan Reid, Roberto Rioja, Steven Han, Trevor Eggenberger, and [Vivian Tan](https://vivianistan.github.io)
 
 Faculty Mentor: Dr. Joydeep Ghosh
 
@@ -37,7 +37,7 @@ Here is the block diagram of the system:
 
   ## Lidar-Camera Transformation:
 
-  Our LIDAR-Camera Transformation (LCT) system is used to compare 3D LIDAR points to positions inside of our camera footage. We use a rotation and translation matrix to convert the 3-dimensional point cloud into the 2-dimensional domain of the camera
+  Our LIDAR-Camera Transformation (LCT) system is used to compare 3D LIDAR points to positions inside of our camera footage. We use a rotation and translation matrix to convert the 3-dimensional point cloud into the 2-dimensional domain of the camera.
 
 
    <div class="grid-x grid-margin-x medium-up-2 grid-margin-x-bottom" id="boxShadow">
@@ -50,7 +50,7 @@ Here is the block diagram of the system:
 
    *Image of point cloud overlayed on truck using LCT*
 
-  We were able to detected a car's distance within 4% error and a person's distance within 2% error. 
+  We were able to detect a car's distance within 4% error and a person's distance within 2% error. 
 
   ## Object Prediction
 
@@ -63,9 +63,34 @@ Here is the block diagram of the system:
 
   # Miscellaneous: 
   ## Getting Started:
+  Most of the code we used is available on Github, however our modified YOLO code is not up yet.
+
+### To run object detection + tracking: 
+
+1. Make sure your camera and LIDAR are in the correct positions (see calibration for more detail)
+
+2. Run the YOLO code from `/darknet` using 
+	
+		./darknet detector demo cfg/coco.data cfg/yolo.cfg yolo.weights
+
+3. In run `python main.py`
+
+
+
+### To check the LIDAR-Camera Matrix transformation:
+1. Place your camera and LIDAR in the correct position
+
+2. Run `python lidar_projection.py` to see the lidar projection on a single image with your calibration matrix
+
+
+### To capture a point cloud in .csv format:
+
+1. Make sure your LIDAR is conneted
+2. Run `python velodyne_capture_v3.py` and your point cloud will be saved as `pcl.csv` by default 
 
   ## Progression:
   ### Apollo:
+
   ### ROS:
   ### YOLO + Python:
   ## Video Demos:
