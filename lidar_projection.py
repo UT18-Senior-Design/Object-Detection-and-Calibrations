@@ -36,7 +36,7 @@ R= np.matmul(R,Xr)
 
 T = np.matrix([[1.1],[0],[-1.32]])
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 # fig, ax = plt.subplots(1)
 # plt.ion()
 # plt.show()
@@ -70,7 +70,9 @@ while 1:
 	c2 = .25*np.matmul((c2),(A+T2))
 
 	for x in np.nditer(c2, flags = ['external_loop'], order = 'F'): 
-		cv2.Circle(frame, (x[0],x[1]), 3, 'red', thickness=-1)
+		cv2.circle(frame, (int(x[0]),int(x[1])), 1, (255,0,0), thickness=-1)
+		#print(x)
+	cv2.imshow('frame', frame)
 
 	c = cv2.waitKey(1)
 	if c == 27:
