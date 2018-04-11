@@ -12,7 +12,9 @@ Graduate Student Mentors: Michael Motro and Taewan Kim
 
 Special Thanks: TxDOT (Texas Department of Transportation)
 
-[Project Site](https://ut18-senior-design.github.io/Object-Detection-and-Calibrations/#/)
+Links:
+* [Project Site](https://ut18-senior-design.github.io/Object-Detection-and-Calibrations/#/)
+* [Code](https://github.com/UT18-Senior-Design/Object-Detection-and-Calibrations/)
 
 # Description:
 
@@ -85,7 +87,7 @@ Here is the block diagram of the system:
 
   The matrices we used were calculated by hand for very specific configurations of the camera and LIDAR positions. 
 
-  ## Object Prediction
+  ## Collision Prediction
 
   We used Kalman filtering to predict the trajectory of detected objects.
 
@@ -135,7 +137,7 @@ Here is the block diagram of the system:
   Since we couldn't find an existing driver to calibrate our LIDAR and camera, we decided to primarily use [YOLO](https://pjreddie.com/darknet/yolo/) and write our own code in Python to create the system we needed. We use YOLO to detect objects and create bounding boxes for them, while we wrote our own code to calibrate the camera and LIDAR and predict the trajectory of the objects. 
 
   ## Video Demos:
-
+  * Links coming soon
 
 <!-- 
 - [System Overview](overview.md)
