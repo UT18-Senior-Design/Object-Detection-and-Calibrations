@@ -13,6 +13,7 @@ from velodyne_capture_v3 import init_velo_socket, get_pointcloud
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import Circle
 
+# Init sockets
 PORT = 2368
 soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 soc.bind(('', PORT))
@@ -24,7 +25,7 @@ zr = 0 * math.pi/180
 
 
 # start z by 90 y by -90
-
+# Matrices: (current projection seems to be off, needs to be fixed?)
 Xr = np.matrix([[1,0,0],[0,math.cos(xr),-1*math.sin(xr)],[0,math.sin(xr),math.cos(xr)]])
 Yr = np.matrix([[math.cos(yr),0,math.sin(yr)],[0,1,0],[-1*math.sin(yr),0,math.cos(yr)]])
 Zr = np.matrix([[math.cos(zr),-1*math.sin(zr),0],[math.sin(zr),math.cos(zr),0],[0,0,1]])
@@ -45,7 +46,9 @@ if not cap.isOpened():
 	raise IOError("cannot open webcam")
 
 while 1:
+	# Get pointcloud
 	pcl = get_pointcloud(soc)
+	# Get frame
 	flag, frame = cap.read()
 	cv2.imshow('frame', frame)	
 	
@@ -53,7 +56,7 @@ while 1:
 	Y= pcl[:,1]
 	Z= pcl[:,2]
 	distance = pcl[:,3]
-	# # make A matrix (x y z)
+	# make A matrix (x y z)
 	size= len(X)
 	X1= np.matrix.transpose(X)
 	Y1= np.matrix.transpose(Y)
@@ -69,8 +72,11 @@ while 1:
 	c2 = np.matmul((F), (R))
 	c2 = .25*np.matmul((c2),(A+T2))
 
+	# Plot points on frame
 	for x in np.nditer(c2, flags = ['external_loop'], order = 'F'): 
-		cv2.Circle(frame, (x[0],x[1]), 3, 'red', thickness=-1)
+		cv2.circle(frame, (int(x[0]),int(x[1])), 1, (255,0,0), thickness=-1)
+		#print(x)
+	cv2.imshow('frame', frame)
 
 	c = cv2.waitKey(1)
 	if c == 27:
