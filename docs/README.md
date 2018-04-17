@@ -28,7 +28,7 @@ Here is the block diagram of the system:
   <div class="grid-x grid-margin-x medium-up-2 grid-margin-x-bottom" id="boxShadow">
     <div class="cell">
       <div class="hoverTarget">
-        <img class="imageTarget" src="images/systemblockdiagram.jpg" alt="abstract0">
+        <img class="imageTarget" src="images/block.png" alt="abstract0">
       </div>
     </div>
   </div>  
@@ -94,7 +94,18 @@ Here is the block diagram of the system:
 
   # Testing and Results 
 
-  # Future work
+  We mainly focused on testing: 
+
+  * LIDAR point cloud collection verification
+  * Object position tracking accuracy
+  * LIDAR-Camera calibration overall quality
+
+  # Potential future work
+
+  * Increase quality of LIDAR-Camera calibration, which could increase accuracy of position tracking
+  * Add functionality for predicting trajectory of multiple objects
+  * Integrate more sensors (radar, additional cameras, etc.)
+  * Integrate/develop basic V2V communication protocol
 
   # Miscellaneous
   ## Sensors
@@ -111,7 +122,7 @@ Here is the block diagram of the system:
 	
 		./darknet detector demo cfg/coco.data cfg/yolo.cfg yolo.weights
 
-3. In run `python main.py`
+3. Then run `python main.py` to run the program
 
 
 
